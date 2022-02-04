@@ -62,20 +62,17 @@ export class TreeWithObjectsComponent implements OnInit {
   dataChange = new BehaviorSubject<FileNode[]>([]);
 
   constructor() {
-    this.treeFlattener = new MatTreeFlattener(this.transformer, this._getLevel,
-      this._isExpandable, this._getChildren);
-    this.treeControl = new FlatTreeControl<FileFlatNode>(this._getLevel, this._isExpandable);
+    this.treeFlattener = new MatTreeFlattener(this.transformer, this.getLevel, this.isExpandable, this.getChildren);
+    this.treeControl = new FlatTreeControl<FileFlatNode>(this.getLevel, this.isExpandable);
     this.dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
     this.dataChange.subscribe(data => this.rebuildTreeForData(data));
   }
 
-  transformer = (node: FileNode, level: number) => {
-    return new FileFlatNode(!!node.children, node.filename, level, node.type, node.id);
-  }
-  private _getLevel = (node: FileFlatNode) => node.level;
-  private _isExpandable = (node: FileFlatNode) => node.expandable;
-  private _getChildren = (node: FileNode): Observable<FileNode[]> => of(node.children);
+  transformer = (node: FileNode, level: number) => new FileFlatNode(!!node.children, node.filename, level, node.type, node.id);
+  getLevel = (node: FileFlatNode) => node.level;
+  isExpandable = (node: FileFlatNode) => node.expandable;
+  getChildren = (node: FileNode): Observable<FileNode[]> => of(node.children);
   hasChild = (_: number, _nodeData: FileFlatNode) => _nodeData.expandable;
 
   ngOnInit(): void {
@@ -145,8 +142,6 @@ export class TreeWithObjectsComponent implements OnInit {
    * then rebuild the tree.
    * */
   drop(event: CdkDragDrop<string[]>) {
-    // console.log('origin/destination', event.previousIndex, event.currentIndex);
-
     // ignore drops outside of the tree
     if (!event.isPointerOverContainer) return;
 
@@ -238,39 +233,5 @@ export class TreeWithObjectsComponent implements OnInit {
       const node = this.treeControl.dataNodes.find((n) => n.id === id);
       this.treeControl.expand(node);
     });
-  }
-
-  /**
-   * Not used but you might need this to programmatically expand nodes
-   * to reveal a particular node
-   */
-  private expandNodesById(flatNodes: FileFlatNode[], ids: string[]) {
-    if (!flatNodes || flatNodes.length === 0) return;
-    const idSet = new Set(ids);
-    return flatNodes.forEach((node) => {
-      if (idSet.has(node.id)) {
-        this.treeControl.expand(node);
-        let parent = this.getParentNode(node);
-        while (parent) {
-          this.treeControl.expand(parent);
-          parent = this.getParentNode(parent);
-        }
-      }
-    });
-  }
-
-  private getParentNode(node: FileFlatNode): FileFlatNode | null {
-    const currentLevel = node.level;
-    if (currentLevel < 1) {
-      return null;
-    }
-    const startIndex = this.treeControl.dataNodes.indexOf(node) - 1;
-    for (let i = startIndex; i >= 0; i--) {
-      const currentNode = this.treeControl.dataNodes[i];
-      if (currentNode.level < currentLevel) {
-        return currentNode;
-      }
-    }
-    return null;
   }
 }

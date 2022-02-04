@@ -66,8 +66,8 @@ export class TreeWithChildrenComponent implements OnInit {
   ];
 
   treeControl: FlatTreeControl<any>;
-  treeFlattener: MatTreeFlattener<any, any>;
-  dataSource: MatTreeFlatDataSource<any, any>;
+  treeFlattener: MatTreeFlattener<FileNode, FileFlatNode>;
+  dataSource: MatTreeFlatDataSource<FileNode, FileFlatNode>;
   expansionModel = new SelectionModel<any>(true);
   dragging = false;
   expandTimeout: any;
@@ -78,18 +78,18 @@ export class TreeWithChildrenComponent implements OnInit {
   constructor(
   ) {
     this.treeFlattener = new MatTreeFlattener(this.transformer, this.getLevel, this.isExpandable, this.getChildren);
-    this.treeControl = new FlatTreeControl<any>(this.getLevel, this.isExpandable);
+    this.treeControl = new FlatTreeControl<FileFlatNode>(this.getLevel, this.isExpandable);
     this.dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
     this.dataChange.subscribe(data => this.rebuildTreeForData(data));
   }
 
-  transformer = (node: any, level: number) => new FileFlatNode(!!node.children, node.name, node.desc, level, node.id);
-  getLevel = (node: any) => node.level;
-  isExpandable = (node: any) => node.expandable;
-  getChildren = (node: any): Observable<any[]> => of(node.children);
+  transformer = (node: FileNode, level: number) => new FileFlatNode(!!node.children, node.name, node.desc, level, node.id);
+  getLevel = (node: FileFlatNode) => node.level;
+  isExpandable = (node: FileFlatNode) => node.expandable;
+  getChildren = (node: FileNode): Observable<any> => of(node.children);
 
-  hasChild = (_: number, node: any) => node.expandable;
+  hasChild = (_: number, node: FileFlatNode) => node.expandable;
 
   ngOnInit(): void {
     this.dataChange.next(this.TREE_DATA);
@@ -204,7 +204,6 @@ export class TreeWithChildrenComponent implements OnInit {
 
   rebuildTreeForData(data: any) {
     this.dataSource.data = data;
-    console.log('this.expansionModel.selected: ', this.expansionModel.selected);
     this.expansionModel.selected.forEach((id) => {
       const node = this.treeControl.dataNodes.find((n) => n.id === id);
       this.treeControl.expand(node);
