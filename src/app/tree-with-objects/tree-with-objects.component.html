@@ -5,10 +5,6 @@
     matTreeNodePadding=""
     cdkDrag
     [cdkDragData]="node"
-    (mouseenter)="dragHover(node)"
-    (mouseleave)="dragHoverEnd()"
-    (cdkDragStarted)="dragStart()"
-    (cdkDragReleased)="dragEnd()"
   >
     <button mat-icon-button disabled></button>
     <mat-icon cdkDragHandle class="mr-2 cursor-move">menu</mat-icon>
@@ -20,10 +16,6 @@
     matTreeNodePadding=""
     cdkDrag
     [cdkDragData]="node"
-    (mouseenter)="dragHover(node)"
-    (mouseleave)="dragHoverEnd()"
-    (cdkDragStarted)="dragStart()"
-    (cdkDragReleased)="dragEnd()"
   >
     <button mat-icon-button matTreeNodeToggle (click)="expansionModel.toggle(node.id)" [attr.aria-label]="'Toggle ' + node.name">
       <mat-icon class="mat-icon-rtl-mirror">
